@@ -3,9 +3,106 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js"></script>
+    <link rel="stylesheet" href="style.css" />
     <title>Document</title>
   </head>
   <body>
-    hello
+    <div class="container">
+      <form id="myForm" onsubmit="handleSubmit(event)">
+        <div class="group-input">
+          <label for="date">Nhập ngày</label>
+          <input type="date" name="date" id="date" required />
+        </div>
+
+        <div class="group-input">
+          <label for="ip">Nhập IP</label>
+          <input type="text" name="ip" id="ip" required />
+        </div>
+        <div class="group-input">
+          <label for="code">Nhập Code</label>
+          <input type="text" name="code" id="code" required />
+        </div>
+        <!-- <div class="group-input">
+          <input type="file" name="imageInput" id="imageInput" />
+        </div> -->
+        <div class="group-button">
+          <button type="submit" id="submitButton">Submit</button>
+          <div id="result"></div>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      function handleSubmit(event) {
+        event.preventDefault();
+
+        var date = document.getElementById('date').value;
+        var ip = document.getElementById('ip').value;
+        var code = document.getElementById('code').value;
+        var data = {
+          date: date,
+          IP: ip,
+          hashedPw: code,
+        };
+        if (date && ip && code) {
+          fetch('http://localhost:3000/api/v1/anti', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => response.json())
+            .then((result) => {
+              console.log('Kết quả từ API:', result);
+              var resultElement = document.getElementById('result');
+              resultElement.textContent = result.data.data
+                ? 'Ảnh hợp lệ'
+                : 'Ảnh đã được chỉnh sửa';
+              if (result.data.data) {
+                resultElement.classList.add('result-pass');
+              } else {
+                resultElement.classList.add('result-error');
+              }
+            })
+            .catch((error) => {
+              console.error('Lỗi khi gửi POST request:', error);
+            });
+        } else {
+          console.log('no con');
+        }
+      }
+
+      // document
+      //   .getElementById('imageInput')
+      //   .addEventListener('change', function (event) {
+      //     const file = event.target.files[0];
+
+      //     // Kiểm tra xem người dùng đã chọn tệp hình ảnh hay chưa
+      //     if (!file) {
+      //       return;
+      //     }
+
+      //     // Đọc tệp hình ảnh và xử lý OCR
+      //     const reader = new FileReader();
+      //     reader.onload = function () {
+      //       const imageDataUrl = reader.result;
+      //       recognizeTextFromImage(imageDataUrl);
+      //     };
+      //     reader.readAsDataURL(file);
+      //   });
+
+      // // Hàm thực hiện OCR trên hình ảnh
+      // function recognizeTextFromImage(imageDataUrl) {
+      //   Tesseract.recognize(imageDataUrl, 'eng')
+      //     .then((result) => {
+      //       console.log(result);
+      //     })
+      //     .catch((err) => {
+      //       console.error('Error:', err);
+      //     });
+      // }
+    </script>
   </body>
 </html>
